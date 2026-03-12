@@ -27,11 +27,14 @@ final class MCEmojiSectionHeader: UICollectionReusableView {
     // MARK: - Constants
     
     private enum Constants {
-        static let backgroundColor = UIColor.popoverBackgroundColor
+        static let backgroundColor = UIColor(
+            light: .white,
+            dark: UIColor(red: 0.11, green: 0.11, blue: 0.12, alpha: 1.0)
+        )
         
-        static let headerLabelColor = UIColor.systemGray
-        static let headerLabelFont = UIFont.systemFont(ofSize: 14.fit(), weight: .regular)
-        static let headerLabelInsets = UIEdgeInsets(top: 0, left: 7, bottom: -4, right: -16)
+        static let headerLabelColor = UIColor(red: 0.537, green: 0.529, blue: 0.522, alpha: 1.0) // #898785
+        static let headerLabelFont = UIFont.systemFont(ofSize: 12, weight: .medium)
+        static let headerLabelInsets = UIEdgeInsets(top: 0, left: 0, bottom: -4, right: -16)
     }
     
     // MARK: - Private Properties

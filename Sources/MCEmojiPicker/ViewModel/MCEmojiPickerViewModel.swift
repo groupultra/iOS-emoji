@@ -24,29 +24,19 @@ import Foundation
 
 /// Protocol for the `MCEmojiPickerViewModel`.
 protocol MCEmojiPickerViewModelProtocol {
-    /// Whether the picker shows empty categories. Default false.
     var showEmptyEmojiCategories: Bool { get set }
-    /// The emoji categories being used
     var emojiCategories: [MCEmojiCategory] { get }
-    /// The observed variable that is responsible for the choice of emoji.
     var selectedEmoji: Observable<MCEmoji?> { get set }
-    /// The observed variable that is responsible for the choice of emoji category.
     var selectedEmojiCategoryIndex: Observable<Int> { get set }
-    /// Clears the selected emoji, setting to `nil`.
+    var searchText: String { get set }
     func clearSelectedEmoji()
-    /// Returns the number of categories with emojis.
     func numberOfSections() -> Int
-    /// Returns the number of emojis in the target section.
     func numberOfItems(in section: Int) -> Int
-    /// Returns the `MCEmoji` for the target `IndexPath`.
     func emoji(at indexPath: IndexPath) -> MCEmoji
-    /// Returns the localized section name for the target section.
     func sectionHeaderName(for section: Int) -> String
-    /// Updates the emoji skin tone and returns the updated `MCEmoji`.
     func updateEmojiSkinTone(_ skinToneRawValue: Int, in indexPath: IndexPath) -> MCEmoji
 }
 
-/// View model which using in `MCEmojiPickerViewController`.
 final class MCEmojiPickerViewModel: MCEmojiPickerViewModelProtocol {
     
     // MARK: - Public Properties
@@ -54,20 +44,29 @@ final class MCEmojiPickerViewModel: MCEmojiPickerViewModelProtocol {
     public var selectedEmoji = Observable<MCEmoji?>(value: nil)
     public var selectedEmojiCategoryIndex = Observable<Int>(value: 0)
     public var showEmptyEmojiCategories = false
+    
+    public var searchText: String = "" {
+        didSet {
+            rebuildFilteredCategories()
+        }
+    }
+    
     public var emojiCategories: [MCEmojiCategory] {
-        allEmojiCategories.filter({ showEmptyEmojiCategories || $0.emojis.count > 0 })
+        if searchText.isEmpty {
+            return allEmojiCategories.filter({ showEmptyEmojiCategories || $0.emojis.count > 0 })
+        }
+        return filteredCategories
     }
     
     // MARK: - Private Properties
     
-    /// All emoji categories.
     private var allEmojiCategories = [MCEmojiCategory]()
+    private var filteredCategories = [MCEmojiCategory]()
     
     // MARK: - Initializers
     
     init(unicodeManager: MCUnicodeManagerProtocol = MCUnicodeManager()) {
         allEmojiCategories = unicodeManager.getEmojisForCurrentIOSVersion()
-        // Increment usage of each emoji upon selection
         selectedEmoji.bind { emoji in
             emoji?.incrementUsageCount()
         }
@@ -100,5 +99,23 @@ final class MCEmojiPickerViewModel: MCEmojiPickerViewModelProtocol {
         let allCategoriesIndex: Int = allEmojiCategories.firstIndex { $0.type == categoryType } ?? 0
         allEmojiCategories[allCategoriesIndex].emojis[indexPath.row].set(skinToneRawValue: skinToneRawValue)
         return allEmojiCategories[allCategoriesIndex].emojis[indexPath.row]
+    }
+    
+    // MARK: - Private Methods
+    
+    private func rebuildFilteredCategories() {
+        let query = searchText.lowercased().trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else {
+            filteredCategories = []
+            return
+        }
+        
+        filteredCategories = allEmojiCategories.compactMap { category in
+            let matched = category.emojis.filter { emoji in
+                emoji.searchKey.lowercased().contains(query)
+            }
+            guard !matched.isEmpty else { return nil }
+            return MCEmojiCategory(type: category.type, emojis: matched)
+        }
     }
 }

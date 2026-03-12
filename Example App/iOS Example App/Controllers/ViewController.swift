@@ -73,7 +73,6 @@ class ViewController: UIViewController {
     @objc private func emojiButtonAction(_ sender: UIButton) {
         let viewController = MCEmojiPickerViewController()
         viewController.delegate = self
-        viewController.sourceView = sender
         present(viewController, animated: true)
     }
     

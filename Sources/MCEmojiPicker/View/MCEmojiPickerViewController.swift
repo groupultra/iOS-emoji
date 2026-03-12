@@ -30,35 +30,19 @@ public final class MCEmojiPickerViewController: UIViewController {
     
     // MARK: - Public Properties
     
-    /// Delegate for selecting an emoji object.
     public weak var delegate: MCEmojiPickerDelegate?
     
-    /// The direction of the arrow for EmojiPicker.
-    ///
-    /// The default value of this property is `.up`.
-    public var arrowDirection: MCPickerArrowDirection = .up
-    
-    /// Custom height for EmojiPicker.
-    /// But it will be limited by the distance from sourceView.origin.y to the upper or lower bound(depends on permittedArrowDirections).
-    ///
-    /// The default value of this property is `nil`.
-    public var customHeight: CGFloat? = nil
-    
-    /// Inset from the sourceView border.
-    ///
-    /// The default value of this property is `0`.
-    public var horizontalInset: CGFloat = 0
-    
-    /// A boolean value that determines whether the screen will be hidden after the emoji is selected.
-    ///
-    /// If this property’s value is `true`, the EmojiPicker will be dismissed after the emoji is selected.
-    /// If you want EmojiPicker not to dismissed after emoji selection, you must set this property to `false`.
-    /// The default value of this property is `true`.
     public var isDismissAfterChoosing: Bool = true
-    
-    /// Color for the selected emoji category.
-    ///
-    /// The default value of this property is `.systemBlue`.
+
+    /// 为 false 时不渲染半透明遮罩（由外部调用方自行提供暗化背景）
+    public var showsDimBackground: Bool = true
+
+    /// emoji picker 开始退场动画时调用（用于同步外部过渡动画）
+    public var onWillDismiss: (() -> Void)?
+
+    /// emoji picker 完全从视图层级移除后调用（用于外部清理）
+    public var onDismiss: (() -> Void)?
+
     public var selectedEmojiCategoryTintColor: UIColor? {
         didSet {
             guard let selectedEmojiCategoryTintColor = selectedEmojiCategoryTintColor else { return }
@@ -66,16 +50,6 @@ public final class MCEmojiPickerViewController: UIViewController {
         }
     }
     
-    /// The view containing the anchor rectangle for the popover.
-    public var sourceView: UIView? {
-        didSet {
-            popoverPresentationController?.sourceView = sourceView
-        }
-    }
-    
-    /// Feedback generator style. To turn off, set `nil` to this parameter.
-    ///
-    /// The default value of this property is `.light`.
     public var feedBackGeneratorStyle: UIImpactFeedbackGenerator.FeedbackStyle? = .light {
         didSet {
             guard let feedBackGeneratorStyle = feedBackGeneratorStyle else {
@@ -86,10 +60,34 @@ public final class MCEmojiPickerViewController: UIViewController {
         }
     }
     
+    /// Container height for the bottom sheet (default 530, matching Figma).
+    public var sheetHeight: CGFloat = 530
+    
+    // MARK: - UI
+    
+    private let dimView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+        return view
+    }()
+    
+    private let containerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(
+            light: .white,
+            dark: UIColor(red: 0.11, green: 0.11, blue: 0.12, alpha: 1.0)
+        )
+        view.layer.cornerRadius = 24
+        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        view.layer.masksToBounds = true
+        return view
+    }()
+    
     // MARK: - Private Properties
     
     private var generator: UIImpactFeedbackGenerator? = UIImpactFeedbackGenerator(style: .light)
-    private var viewModel: MCEmojiPickerViewModelProtocol = MCEmojiPickerViewModel()
+    private var viewModel: MCEmojiPickerViewModel = MCEmojiPickerViewModel()
+    private var containerBottomConstraint: NSLayoutConstraint!
     private lazy var emojiPickerView: MCEmojiPickerView = {
         let categories = viewModel.emojiCategories.map { $0.type }
         return MCEmojiPickerView(categoryTypes: categories, delegate: self)
@@ -99,8 +97,8 @@ public final class MCEmojiPickerViewController: UIViewController {
     
     public init() {
         super.init(nibName: nil, bundle: nil)
-        setupPopoverPresentationStyle()
-        setupDelegates()
+        modalPresentationStyle = .overFullScreen
+        modalTransitionStyle = .crossDissolve
         bindViewModel()
     }
     
@@ -110,24 +108,113 @@ public final class MCEmojiPickerViewController: UIViewController {
     
     // MARK: - Life Cycle
     
-    public override func loadView() {
-        view = emojiPickerView
-    }
-    
     public override func viewDidLoad() {
         super.viewDidLoad()
-        setupPreferredContentSize()
-        setupArrowDirections()
+        if !showsDimBackground {
+            dimView.backgroundColor = .clear
+        }
+        setupUI()
+        setupKeyboardObservers()
     }
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        setupHorizontalInset()
+        animateIn()
     }
     
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+        NotificationCenter.default.removeObserver(self)
         NotificationCenter.default.post(name: .MCEmojiPickerDidDisappear, object: nil)
+        onDismiss?()
+    }
+    
+    // MARK: - Setup
+    
+    private func setupUI() {
+        view.backgroundColor = .clear
+        
+        view.addSubview(dimView)
+        view.addSubview(containerView)
+        containerView.addSubview(emojiPickerView)
+        
+        emojiPickerView.translatesAutoresizingMaskIntoConstraints = false
+        dimView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        
+        containerBottomConstraint = containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        
+        NSLayoutConstraint.activate([
+            dimView.topAnchor.constraint(equalTo: view.topAnchor),
+            dimView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            dimView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            dimView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            containerBottomConstraint,
+            containerView.heightAnchor.constraint(equalToConstant: sheetHeight),
+            
+            emojiPickerView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            emojiPickerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            emojiPickerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            emojiPickerView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+        ])
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleDimTap))
+        dimView.addGestureRecognizer(tapGesture)
+    }
+    
+    // MARK: - Actions
+    
+    @objc private func handleDimTap() {
+        dismissWithAnimation()
+    }
+    
+    private func dismissWithAnimation() {
+        view.endEditing(true)
+        onWillDismiss?()
+        animateOut {
+            self.dismiss(animated: false)
+        }
+    }
+    
+    // MARK: - Keyboard
+    
+    private func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(keyboardWillShow(_:)),
+            name: UIResponder.keyboardWillShowNotification, object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(keyboardWillHide(_:)),
+            name: UIResponder.keyboardWillHideNotification, object: nil
+        )
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let info = notification.userInfo,
+              let keyboardFrame = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+              let duration = info[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double,
+              let curveValue = info[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt
+        else { return }
+        
+        containerBottomConstraint.constant = -71
+        UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curveValue << 16)) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        guard let info = notification.userInfo,
+              let duration = info[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double,
+              let curveValue = info[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt
+        else { return }
+        
+        containerBottomConstraint.constant = 0
+        UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curveValue << 16)) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     // MARK: - Private Methods
@@ -138,7 +225,7 @@ public final class MCEmojiPickerViewController: UIViewController {
             feedbackImpactOccurred()
             delegate?.didGetEmoji(emoji: emoji.string)
             if isDismissAfterChoosing {
-                dismiss(animated: true, completion: nil)
+                dismissWithAnimation()
             }
         }
         viewModel.selectedEmojiCategoryIndex.bind { [unowned self] categoryIndex in
@@ -146,47 +233,26 @@ public final class MCEmojiPickerViewController: UIViewController {
         }
     }
     
-    private func setupDelegates() {
-        presentationController?.delegate = self
+    // MARK: - Animations
+    
+    private func animateIn() {
+        let initialTransform = CGAffineTransform(translationX: 0, y: sheetHeight)
+        containerView.transform = initialTransform
+        dimView.alpha = 0
+        
+        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 0, options: .curveEaseOut) {
+            self.containerView.transform = .identity
+            self.dimView.alpha = 1
+        }
     }
     
-    private func setupPopoverPresentationStyle() {
-        modalPresentationStyle = .popover
-    }
-    
-    private func setupPreferredContentSize() {
-        preferredContentSize = {
-            switch UIDevice.current.userInterfaceIdiom {
-            case .phone:
-                let sideInset: CGFloat = 19
-                let screenWidth: CGFloat = UIScreen.main.nativeBounds.width / UIScreen.main.nativeScale
-                let popoverWidth: CGFloat = screenWidth - (sideInset * 2)
-                // The number 0.16 was taken based on the proportion of height to the width of the EmojiPicker on MacOS.
-                let heightProportionToWidth: CGFloat = 1.16
-                return CGSize(
-                    width: popoverWidth,
-                    height: customHeight ?? popoverWidth * heightProportionToWidth
-                )
-            default:
-                return CGSize(width: 340, height: 380)
-            }
-        }()
-    }
-    
-    private func setupArrowDirections() {
-        popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection(
-            rawValue: arrowDirection.rawValue
-        )
-    }
-    
-    private func setupHorizontalInset() {
-        guard let sourceView = sourceView else { return }
-        popoverPresentationController?.sourceRect = CGRect(
-            x: 0,
-            y: popoverPresentationController?.arrowDirection == .up ? horizontalInset : -horizontalInset,
-            width: sourceView.frame.width,
-            height: sourceView.frame.height
-        )
+    private func animateOut(completion: @escaping () -> Void) {
+        UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseIn, animations: {
+            self.containerView.transform = CGAffineTransform(translationX: 0, y: self.sheetHeight)
+            self.dimView.alpha = 0
+        }) { _ in
+            completion()
+        }
     }
 }
 
@@ -222,7 +288,7 @@ extension MCEmojiPickerViewController: MCEmojiPickerViewDelegate {
     }
     
     func getEmojiPickerFrame() -> CGRect {
-        presentationController?.presentedView?.frame ?? view.frame
+        containerView.frame
     }
     
     func updateEmojiSkinTone(_ skinToneRawValue: Int, in indexPath: IndexPath) {
@@ -239,12 +305,9 @@ extension MCEmojiPickerViewController: MCEmojiPickerViewDelegate {
     func didChoiceEmoji(_ emoji: MCEmoji?) {
         viewModel.selectedEmoji.value = emoji
     }
-}
-
-// MARK: - UIAdaptivePresentationControllerDelegate
-
-extension MCEmojiPickerViewController: UIAdaptivePresentationControllerDelegate {
-    public func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
-        return .none
+    
+    func searchEmojis(with text: String) {
+        viewModel.searchText = text
+        emojiPickerView.reloadCollectionView()
     }
 }
