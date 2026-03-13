@@ -2040,13 +2040,13 @@ enum MCEmojiDefinitions {
                 version: 0.7
             ),
             MCEmoji(
-                emojiKeys: [0x1F575, 0x200D, 0x2642, 0xFE0F],
+                emojiKeys: [0x1F575, 0xFE0F, 0x200D, 0x2642, 0xFE0F],
                 isSkinToneSupport: true,
                 searchKey: "manDetective",
                 version: 4.0
             ),
             MCEmoji(
-                emojiKeys: [0x1F575, 0x200D, 0x2640, 0xFE0F],
+                emojiKeys: [0x1F575, 0xFE0F, 0x200D, 0x2640, 0xFE0F],
                 isSkinToneSupport: true,
                 searchKey: "womanDetective",
                 version: 4.0
@@ -2676,13 +2676,13 @@ enum MCEmojiDefinitions {
                 version: 0.7
             ),
             MCEmoji(
-                emojiKeys: [0x1F3CC, 0x200D, 0x2642, 0xFE0F],
+                emojiKeys: [0x1F3CC, 0xFE0F, 0x200D, 0x2642, 0xFE0F],
                 isSkinToneSupport: true,
                 searchKey: "manGolfing",
                 version: 4.0
             ),
             MCEmoji(
-                emojiKeys: [0x1F3CC, 0x200D, 0x2640, 0xFE0F],
+                emojiKeys: [0x1F3CC, 0xFE0F, 0x200D, 0x2640, 0xFE0F],
                 isSkinToneSupport: true,
                 searchKey: "womanGolfing",
                 version: 4.0
@@ -2748,13 +2748,13 @@ enum MCEmojiDefinitions {
                 version: 0.7
             ),
             MCEmoji(
-                emojiKeys: [0x26F9, 0x200D, 0x2642, 0xFE0F],
+                emojiKeys: [0x26F9, 0xFE0F, 0x200D, 0x2642, 0xFE0F],
                 isSkinToneSupport: true,
                 searchKey: "manBouncingBall",
                 version: 4.0
             ),
             MCEmoji(
-                emojiKeys: [0x26F9, 0x200D, 0x2640, 0xFE0F],
+                emojiKeys: [0x26F9, 0xFE0F, 0x200D, 0x2640, 0xFE0F],
                 isSkinToneSupport: true,
                 searchKey: "womanBouncingBall",
                 version: 4.0
@@ -2766,13 +2766,13 @@ enum MCEmojiDefinitions {
                 version: 0.7
             ),
             MCEmoji(
-                emojiKeys: [0x1F3CB, 0x200D, 0x2642, 0xFE0F],
+                emojiKeys: [0x1F3CB, 0xFE0F, 0x200D, 0x2642, 0xFE0F],
                 isSkinToneSupport: true,
                 searchKey: "manLiftingWeights",
                 version: 4.0
             ),
             MCEmoji(
-                emojiKeys: [0x1F3CB, 0x200D, 0x2640, 0xFE0F],
+                emojiKeys: [0x1F3CB, 0xFE0F, 0x200D, 0x2640, 0xFE0F],
                 isSkinToneSupport: true,
                 searchKey: "womanLiftingWeights",
                 version: 4.0
