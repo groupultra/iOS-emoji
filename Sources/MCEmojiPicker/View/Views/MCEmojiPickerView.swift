@@ -190,6 +190,14 @@ final class MCEmojiPickerView: UIView {
     private func setupDelegates() {
         collectionView.delegate = self
         collectionView.dataSource = self
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleBackgroundTap))
+        tap.cancelsTouchesInView = false
+        addGestureRecognizer(tap)
+    }
+
+    @objc private func handleBackgroundTap() {
+        endEditing(true)
     }
     
     private func setupViewLayout() {
