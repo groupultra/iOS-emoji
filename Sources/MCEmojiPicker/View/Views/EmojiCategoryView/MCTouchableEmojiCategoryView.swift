@@ -46,6 +46,16 @@ final class MCTouchableEmojiCategoryView: UIView {
     }()
     /// Target category index.
     private var categoryIndex: Int
+
+    /// Circular background shown behind the icon when this tab is selected (matches Figma fills/tertiary).
+    private let selectionBackgroundView: UIView = {
+        let v = UIView()
+        v.backgroundColor = .tertiarySystemFill
+        v.layer.cornerRadius = 15
+        v.isHidden = true
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
     
     private weak var delegate: MCEmojiCategoryViewDelegate?
     
@@ -96,17 +106,23 @@ final class MCTouchableEmojiCategoryView: UIView {
      - Parameter selectedCategoryIndex: Selected category index.
      */
     public func updateCategoryViewState(selectedCategoryIndex: Int) {
-        categoryIconView.updateIconTintColor(
-            for: categoryIndex == selectedCategoryIndex ? .selected : .standard
-        )
+        let isSelected = categoryIndex == selectedCategoryIndex
+        categoryIconView.updateIconTintColor(for: isSelected ? .selected : .standard)
+        selectionBackgroundView.isHidden = !isSelected
     }
     
     // MARK: - Private Methods
     
     private func setupCategoryIconViewLayout() {
         guard !categoryIconView.isDescendant(of: self) else { return }
+        addSubview(selectionBackgroundView)
         addSubview(categoryIconView)
         NSLayoutConstraint.activate([
+            selectionBackgroundView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            selectionBackgroundView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            selectionBackgroundView.widthAnchor.constraint(equalToConstant: 30),
+            selectionBackgroundView.heightAnchor.constraint(equalToConstant: 30),
+
             categoryIconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: categoryIconViewInsets.left),
             categoryIconView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -categoryIconViewInsets.right),
             categoryIconView.topAnchor.constraint(equalTo: topAnchor, constant: categoryIconViewInsets.top),

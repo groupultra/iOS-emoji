@@ -68,12 +68,10 @@ final class MCEmojiCategoryIconView: UIView {
         guard self.state != state else { return }
         self.state = state
         switch state {
-        case .standard:
+        case .standard, .selected:
             currentIconTintColor = .systemGray
         case .highlighted:
             currentIconTintColor = adjust(color: currentIconTintColor)
-        case .selected:
-            currentIconTintColor = selectedIconTintColor
         }
         setNeedsDisplay()
     }

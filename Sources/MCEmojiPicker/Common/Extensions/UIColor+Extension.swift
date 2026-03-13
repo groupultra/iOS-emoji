@@ -39,6 +39,36 @@ extension UIColor {
     )
 }
 
+// MARK: - Intent Design Token Colors
+// Values align with App's IMColorKey defaultColor for each semantic token.
+extension UIColor {
+    /// Matches App's backgroundNeutralSecondary — sheet / panel background.
+    static let mcBackgroundNeutralSecondary = UIColor(
+        light: .white,
+        dark: UIColor(red: 70/255.0, green: 67/255.0, blue: 63/255.0, alpha: 1.0) // #46433F
+    )
+    /// Matches App's backgroundNeutralTertiary — search bar background.
+    static let mcBackgroundNeutralTertiary = UIColor(
+        light: UIColor(red: 246/255.0, green: 243/255.0, blue: 242/255.0, alpha: 1.0), // #F6F3F2
+        dark: UIColor(red: 46/255.0, green: 44/255.0, blue: 40/255.0, alpha: 1.0) // #2E2C28
+    )
+    /// Matches App's contentNeutralTertiary — section header text.
+    static let mcContentNeutralTertiary = UIColor(
+        light: UIColor(red: 137/255.0, green: 135/255.0, blue: 133/255.0, alpha: 1.0), // #898785
+        dark: UIColor(red: 199/255.0, green: 197/255.0, blue: 196/255.0, alpha: 1.0) // #C7C5C4
+    )
+    /// Matches App's contentNeutralReverseTertiary — grabber, search icon.
+    static let mcContentNeutralReverseTertiary = UIColor(
+        light: UIColor(red: 199/255.0, green: 197/255.0, blue: 196/255.0, alpha: 1.0), // #C7C5C4
+        dark: UIColor(red: 105/255.0, green: 101/255.0, blue: 99/255.0, alpha: 1.0) // #696563
+    )
+    /// Matches App's extensionReverse80SecondaryOverlay — emoji row card background.
+    static let mcExtensionReverse80SecondaryOverlay = UIColor(
+        light: UIColor(white: 1.0, alpha: 0.8),
+        dark: UIColor(white: 0.0, alpha: 0.8)
+    )
+}
+
 extension UIColor {
     /// Adds support for dark and light interface style modes.
     convenience init(light: UIColor, dark: UIColor) {

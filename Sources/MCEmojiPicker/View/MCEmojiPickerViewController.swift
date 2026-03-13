@@ -73,10 +73,7 @@ public final class MCEmojiPickerViewController: UIViewController {
     
     private let containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(
-            light: .white,
-            dark: UIColor(red: 0.11, green: 0.11, blue: 0.12, alpha: 1.0)
-        )
+        view.backgroundColor = .mcBackgroundNeutralSecondary
         view.layer.cornerRadius = 24
         view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         view.layer.masksToBounds = true

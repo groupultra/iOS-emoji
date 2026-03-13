@@ -55,27 +55,18 @@ final class MCEmojiPickerView: UIView {
         static let collectionViewHeaderHeight = 30.0
         
         static let categoriesStackViewInsets = UIEdgeInsets(top: 0, left: 24, bottom: 0, right: -24)
-        static let categoriesStackViewHeight: CGFloat = 44
-        
-        static let separatorHeight = 0.8
-        static let separatorColor = UIColor(
-            light: UIColor(red: 0.78, green: 0.78, blue: 0.78, alpha: 1.0),
-            dark: UIColor(red: 0.22, green: 0.22, blue: 0.23, alpha: 1.0)
-        )
+        static let categoriesStackViewHeight: CGFloat = 52
         
         static let grabberWidth: CGFloat = 73
         static let grabberHeight: CGFloat = 4
         static let grabberTopInset: CGFloat = 11
-        static let grabberColor = UIColor(red: 0.78, green: 0.77, blue: 0.77, alpha: 1.0) // #C7C5C4
-        
+        static let grabberColor: UIColor = .mcContentNeutralReverseTertiary
+
         static let searchBarHeight: CGFloat = 40
         static let searchBarTopInset: CGFloat = 32
         static let searchBarSideInset: CGFloat = 24
         static let searchBarCornerRadius: CGFloat = 12
-        static let searchBarBackgroundColor = UIColor(
-            light: UIColor(red: 0.965, green: 0.953, blue: 0.949, alpha: 1.0), // #F6F3F2
-            dark: UIColor(red: 0.17, green: 0.17, blue: 0.18, alpha: 1.0)
-        )
+        static let searchBarBackgroundColor: UIColor = .mcBackgroundNeutralTertiary
     }
     
     // MARK: - Private Properties
@@ -103,7 +94,7 @@ final class MCEmojiPickerView: UIView {
         field.addTarget(self, action: #selector(searchTextDidChange), for: .editingChanged)
         
         let iconView = UIImageView(image: UIImage(systemName: "magnifyingglass"))
-        iconView.tintColor = UIColor(red: 0.78, green: 0.77, blue: 0.77, alpha: 1.0)
+        iconView.tintColor = .mcContentNeutralReverseTertiary
         iconView.contentMode = .scaleAspectFit
         iconView.frame = CGRect(x: 8, y: 0, width: 20, height: 20)
         let container = UIView(frame: CGRect(x: 0, y: 0, width: 36, height: 20))
@@ -115,7 +106,7 @@ final class MCEmojiPickerView: UIView {
     }()
     
     private let collectionView: UICollectionView = {
-        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        let layout = MCEmojiPickerFlowLayout()
         layout.sectionHeadersPinToVisibleBounds = true
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.verticalScrollIndicatorInsets.top = Constants.verticalScrollIndicatorTopInset
@@ -193,10 +184,7 @@ final class MCEmojiPickerView: UIView {
     // MARK: - Private Methods
     
     private func setupBackgroundColor() {
-        backgroundColor = UIColor(
-            light: .white,
-            dark: UIColor(red: 0.11, green: 0.11, blue: 0.12, alpha: 1.0)
-        )
+        backgroundColor = .mcBackgroundNeutralSecondary
     }
     
     private func setupDelegates() {
@@ -205,11 +193,7 @@ final class MCEmojiPickerView: UIView {
     }
     
     private func setupViewLayout() {
-        let bgColor = UIColor(
-            light: .white,
-            dark: UIColor(red: 0.11, green: 0.11, blue: 0.12, alpha: 1.0)
-        )
-        categoriesBackgroundView.backgroundColor = bgColor
+        categoriesBackgroundView.backgroundColor = .mcBackgroundNeutralSecondary
         
         let safeBottom = window?.safeAreaInsets.bottom
             ?? UIApplication.shared.connectedScenes
@@ -260,18 +244,6 @@ final class MCEmojiPickerView: UIView {
         
         collectionView.contentInset.bottom = Constants.categoriesStackViewHeight + 8
         collectionView.verticalScrollIndicatorInsets.bottom = Constants.categoriesStackViewHeight + 8
-        
-        let separatorView = UIView()
-        separatorView.translatesAutoresizingMaskIntoConstraints = false
-        separatorView.backgroundColor = Constants.separatorColor
-        addSubview(separatorView)
-        
-        NSLayoutConstraint.activate([
-            separatorView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            separatorView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            separatorView.topAnchor.constraint(equalTo: categoriesStackView.topAnchor),
-            separatorView.heightAnchor.constraint(equalToConstant: Constants.separatorHeight)
-        ])
     }
     
     private func setupCategoryViews() {
