@@ -97,8 +97,19 @@ final class MCEmojiPickerViewModel: MCEmojiPickerViewModelProtocol {
     public func updateEmojiSkinTone(_ skinToneRawValue: Int, in indexPath: IndexPath) -> MCEmoji {
         let categoryType: MCEmojiCategoryType = emojiCategories[indexPath.section].type
         let allCategoriesIndex: Int = allEmojiCategories.firstIndex { $0.type == categoryType } ?? 0
-        allEmojiCategories[allCategoriesIndex].emojis[indexPath.row].set(skinToneRawValue: skinToneRawValue)
-        return allEmojiCategories[allCategoriesIndex].emojis[indexPath.row]
+
+        // When search is active, emojiCategories is a filtered subset.
+        // indexPath.row refers to the filtered list, NOT allEmojiCategories,
+        // so we must match by emojiKeys to find the correct position in the full list.
+        let filteredEmoji = emojiCategories[indexPath.section].emojis[indexPath.row]
+        guard let allEmojiIndex = allEmojiCategories[allCategoriesIndex].emojis.firstIndex(where: {
+            $0.emojiKeys == filteredEmoji.emojiKeys
+        }) else {
+            return filteredEmoji
+        }
+
+        allEmojiCategories[allCategoriesIndex].emojis[allEmojiIndex].set(skinToneRawValue: skinToneRawValue)
+        return allEmojiCategories[allCategoriesIndex].emojis[allEmojiIndex]
     }
     
     // MARK: - Private Methods
