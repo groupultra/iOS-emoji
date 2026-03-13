@@ -64,8 +64,19 @@ final class MCEmojiPickerViewModel: MCEmojiPickerViewModelProtocol {
     private var filteredCategories = [MCEmojiCategory]()
     
     // MARK: - Initializers
-    
-    init(unicodeManager: MCUnicodeManagerProtocol = MCUnicodeManager()) {
+
+    /// - Parameter locale: BCP-47 language tag used to select the keyword file.
+    ///   Pass `Localize.currentLanguage()` from the host app.
+    ///   Defaults to the system-preferred language when `nil`.
+    init(locale: String? = nil) {
+        allEmojiCategories = MCUnicodeManager(locale: locale).getEmojisForCurrentIOSVersion()
+        selectedEmoji.bind { emoji in
+            emoji?.incrementUsageCount()
+        }
+    }
+
+    /// Initializer that accepts a pre-built unicodeManager (used in tests).
+    init(unicodeManager: MCUnicodeManagerProtocol) {
         allEmojiCategories = unicodeManager.getEmojisForCurrentIOSVersion()
         selectedEmoji.bind { emoji in
             emoji?.incrementUsageCount()
@@ -123,7 +134,11 @@ final class MCEmojiPickerViewModel: MCEmojiPickerViewModelProtocol {
         
         filteredCategories = allEmojiCategories.compactMap { category in
             let matched = category.emojis.filter { emoji in
-                emoji.searchKey.lowercased().contains(query)
+                if emoji.searchTags.isEmpty {
+                    // Fallback for emojis without injected tags (should not happen in practice)
+                    return emoji.searchKey.lowercased().contains(query)
+                }
+                return emoji.searchTags.contains { $0.hasPrefix(query) }
             }
             guard !matched.isEmpty else { return nil }
             return MCEmojiCategory(type: category.type, emojis: matched)

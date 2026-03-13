@@ -1,0 +1,13 @@
+{
+  "name": "emoji-keyword-extractor",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Extracts CLDR emoji search keywords for 40 locales",
+  "scripts": {
+    "extract": "node extract-search-keywords.js"
+  },
+  "dependencies": {
+    "cldr-annotations-derived-full": "^48.1.0",
+    "cldr-annotations-full": "^48.1.0"
+  }
+}

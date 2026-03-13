@@ -26,6 +26,14 @@ import Foundation
 @_spi(JSON)
 public struct MCEmoji: Codable {
     // MARK: - Types
+
+    /// Explicit CodingKeys so that `searchTags` is excluded from JSON encode/decode.
+    private enum CodingKeys: String, CodingKey {
+        case emojiKeys
+        case isSkinToneSupport
+        case searchKey
+        case version
+    }
     
     /// Keys for storage in UserDefaults.
     private enum StorageKeys {
@@ -74,10 +82,13 @@ public struct MCEmoji: Codable {
     private(set) public var emojiKeys: [Int]
     /// A boolean indicating whether this emoji has different skin tones available.
     private(set) public var isSkinToneSupport: Bool
-    /// The search key for the emoji.
+    /// The original camelCase search key (kept for backward compatibility).
     private(set) public var searchKey: String
     /// The emoji version.
     private(set) public var version: Double
+    /// Localized search keywords injected at runtime from CLDR data.
+    /// Not persisted in JSON — populated by MCUnicodeManager on load.
+    public var searchTags: [String] = []
     
     // MARK: - Initializers
     

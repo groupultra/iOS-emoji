@@ -45,43 +45,87 @@ final class MCUnicodeManager: MCUnicodeManagerProtocol {
     
     /// The maximum number of frequently used emojis to include in the `frequentlyUsed` category.
     public let maxFrequentlyUsedEmojisCount: Int
+
+    /// The BCP-47 locale used to select which search-keyword file to load.
+    /// Pass `Localize.currentLanguage()` (or equivalent) from the host app.
+    public let locale: String
     
     // MARK: - Initializers
-    
-    public init(maxFrequentlyUsedEmojis: Int = 30) {
+
+    /// - Parameters:
+    ///   - maxFrequentlyUsedEmojis: Max count of frequently-used emojis shown.
+    ///   - locale: BCP-47 language tag (e.g. `"zh-Hans"`, `"en"`).
+    ///     Only the matching keyword file is loaded — keeping memory minimal.
+    ///     Defaults to the first system-preferred language.
+    public init(maxFrequentlyUsedEmojis: Int = 30, locale: String? = nil) {
         self.maxFrequentlyUsedEmojisCount = maxFrequentlyUsedEmojis
+        self.locale = locale ?? Locale.preferredLanguages.first ?? "en"
     }
     
     // MARK: - Public Methods
     
-    /// Returns all emojis available for the current device's iOS version.
+    /// Returns all emojis available for the current device's iOS version,
+    /// with `searchTags` populated from the current locale's CLDR keyword file.
     func getEmojisForCurrentIOSVersion() -> [MCEmojiCategory] {
+        let keywords = MCSearchKeywordsLoader.loadKeywords(for: locale)
+
+        // Inject searchTags into every emoji in every category.
+        // MCEmoji and MCEmojiCategory are value types, so this creates
+        // independent copies without mutating the shared static `defaultEmojis`.
+        let taggedCategories: [MCEmojiCategory] = Self.defaultEmojis.map { category in
+            var cat = category
+            cat.emojis = category.emojis.map { emoji in
+                var e = emoji
+                e.searchTags = keywords[e.string] ?? Self.camelCaseWords(from: e.searchKey)
+                return e
+            }
+            return cat
+        }
+
         let frequentlyUsedEmojis: MCEmojiCategory = .init(
             type: .frequentlyUsed,
-            emojis: getFrequentlyUsedEmojis()
+            emojis: getFrequentlyUsedEmojis(from: taggedCategories)
         )
-        return [frequentlyUsedEmojis] + Self.defaultEmojis
+        return [frequentlyUsedEmojis] + taggedCategories
     }
     
     // MARK: - Private Methods
 
-    /// Returns the top n (`maxFrequentlyUsedEmojis`) emojis by usage, for emojis with a `usageCount` > 0.
-    private func getFrequentlyUsedEmojis() -> [MCEmoji] {
+    /// Returns the top n (`maxFrequentlyUsedEmojis`) emojis by usage from the given tagged categories.
+    private func getFrequentlyUsedEmojis(from categories: [MCEmojiCategory]) -> [MCEmoji] {
         Array(
-            Self.defaultEmojis
-                .lazy
-                .flatMap({ $0.emojis })
-                .filter({ $0.usageCount > 0 })
-                .sorted(by: { lhs, rhs in
+            categories
+                .flatMap { $0.emojis }
+                .filter { $0.usageCount > 0 }
+                .sorted { lhs, rhs in
                     let (aUsage, bUsage) = (lhs.usage, rhs.usage)
                     guard aUsage.count != bUsage.count else {
                         // Break ties with most recent usage
                         return lhs.lastUsage > rhs.lastUsage
                     }
                     return aUsage.count > bUsage.count
-                })
+                }
                 .prefix(maxFrequentlyUsedEmojisCount)
         )
+    }
+
+    /// Splits a camelCase search key into lowercase words for fallback search.
+    /// e.g. "grinningFace" → ["grinning", "face"]
+    private static func camelCaseWords(from key: String) -> [String] {
+        var words: [String] = []
+        var current = ""
+        for char in key {
+            if char.isUppercase, !current.isEmpty {
+                words.append(current.lowercased())
+                current = String(char)
+            } else {
+                current.append(char)
+            }
+        }
+        if !current.isEmpty {
+            words.append(current.lowercased())
+        }
+        return words
     }
 
     // MARK: - Private Properties

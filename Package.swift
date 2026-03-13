@@ -25,6 +25,7 @@ let package = Package(
                 .copy("Resources/EmojiDefinitions/emotionsAndPeople.json"),
                 .copy("Resources/EmojiDefinitions/animalsAndNature.json"),
                 .copy("Resources/EmojiDefinitions/activities.json"),
+                .copy("Resources/SearchKeywords"),
             ]
         ),
         .executableTarget(name: "MCEmojiPickerJSON", dependencies: ["MCEmojiPicker"])

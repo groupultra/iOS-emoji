@@ -83,7 +83,7 @@ public final class MCEmojiPickerViewController: UIViewController {
     // MARK: - Private Properties
     
     private var generator: UIImpactFeedbackGenerator? = UIImpactFeedbackGenerator(style: .light)
-    private var viewModel: MCEmojiPickerViewModel = MCEmojiPickerViewModel()
+    private var viewModel: MCEmojiPickerViewModel
     private var containerBottomConstraint: NSLayoutConstraint!
     private lazy var emojiPickerView: MCEmojiPickerView = {
         let categories = viewModel.emojiCategories.map { $0.type }
@@ -91,8 +91,13 @@ public final class MCEmojiPickerViewController: UIViewController {
     }()
     
     // MARK: - Initializers
-    
-    public init() {
+
+    /// - Parameter locale: BCP-47 language tag that controls which search-keyword
+    ///   file is loaded. Pass `Localize.currentLanguage()` (or your equivalent).
+    ///   Only ONE file is loaded at runtime — keeping memory minimal.
+    ///   Defaults to the first system-preferred language when `nil`.
+    public init(locale: String? = nil) {
+        viewModel = MCEmojiPickerViewModel(locale: locale)
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
         modalTransitionStyle = .crossDissolve

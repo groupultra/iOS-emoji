@@ -1,2 +1,6 @@
 .swiftpm/
 .DS_Store
+
+# Node.js build-time tools (scripts/extract-search-keywords.js dependencies)
+scripts/node_modules/
+scripts/package-lock.json
