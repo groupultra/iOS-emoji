@@ -92,6 +92,8 @@ const LOCALE_MAP = [
   ['tr',      'tr'],
   ['uk',      'uk'],
   ['vi',      'vi'],
+  ['fil',     'fil'],
+  ['pt',      'pt'],
   ['zh-HK',   'zh-Hant', 'zh-Hant-HK'],
   ['zh-Hans', 'zh'],
   ['zh-Hant', 'zh-Hant'],
