@@ -23,14 +23,14 @@
 import UIKit
 
 /// Decoration view rendered behind each row of emoji cells.
-/// Matches the Figma design: semi-transparent card with 24pt corner radius
-/// using extensionReverse80SecondaryOverlay (white 80% light / black 80% dark).
+/// Keep it transparent so host apps don't get unintended dark row pills when the
+/// picker is presented on top of custom chat overlays.
 final class MCEmojiRowDecorationView: UICollectionReusableView {
     static let elementKind = "MCEmojiRowDecorationView"
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .mcExtensionReverse80SecondaryOverlay
+        backgroundColor = .clear
         layer.cornerRadius = 24
     }
 
