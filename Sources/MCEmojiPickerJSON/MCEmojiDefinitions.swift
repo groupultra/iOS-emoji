@@ -378,12 +378,6 @@ enum MCEmojiDefinitions {
                 version: 5.0
             ),
             MCEmoji(
-                emojiKeys: [0x1F927],
-                isSkinToneSupport: false,
-                searchKey: "sneezingFace",
-                version: 3.0
-            ),
-            MCEmoji(
                 emojiKeys: [0x1F975],
                 isSkinToneSupport: false,
                 searchKey: "hotFace",
@@ -3306,12 +3300,6 @@ enum MCEmojiDefinitions {
                 version: 1.0
             ),
             MCEmoji(
-                emojiKeys: [0x1F406],
-                isSkinToneSupport: false,
-                searchKey: "leopard",
-                version: 1.0
-            ),
-            MCEmoji(
                 emojiKeys: [0x1F434],
                 isSkinToneSupport: false,
                 searchKey: "horseFace",
@@ -3816,12 +3804,6 @@ enum MCEmojiDefinitions {
                 version: 0.6
             ),
             MCEmoji(
-                emojiKeys: [0x1F988],
-                isSkinToneSupport: false,
-                searchKey: "shark",
-                version: 3.0
-            ),
-            MCEmoji(
                 emojiKeys: [0x1F419],
                 isSkinToneSupport: false,
                 searchKey: "octopus",
@@ -3861,12 +3843,6 @@ enum MCEmojiDefinitions {
                 emojiKeys: [0x1F41B],
                 isSkinToneSupport: false,
                 searchKey: "bug",
-                version: 0.6
-            ),
-            MCEmoji(
-                emojiKeys: [0x1F41C],
-                isSkinToneSupport: false,
-                searchKey: "ant",
                 version: 0.6
             ),
             MCEmoji(
@@ -5253,12 +5229,6 @@ enum MCEmojiDefinitions {
                 emojiKeys: [0x1FA80],
                 isSkinToneSupport: false,
                 searchKey: "yoYo",
-                version: 12.0
-            ),
-            MCEmoji(
-                emojiKeys: [0x1FA81],
-                isSkinToneSupport: false,
-                searchKey: "kite",
                 version: 12.0
             ),
             MCEmoji(
@@ -7962,12 +7932,6 @@ enum MCEmojiDefinitions {
                 version: 13.0
             ),
             MCEmoji(
-                emojiKeys: [0x1F529],
-                isSkinToneSupport: false,
-                searchKey: "nutAndBolt",
-                version: 0.6
-            ),
-            MCEmoji(
                 emojiKeys: [0x2699, 0xFE0F],
                 isSkinToneSupport: false,
                 searchKey: "gear",
@@ -8121,18 +8085,6 @@ enum MCEmojiDefinitions {
                 emojiKeys: [0x1F6D7],
                 isSkinToneSupport: false,
                 searchKey: "elevator",
-                version: 13.0
-            ),
-            MCEmoji(
-                emojiKeys: [0x1FA9E],
-                isSkinToneSupport: false,
-                searchKey: "mirror",
-                version: 13.0
-            ),
-            MCEmoji(
-                emojiKeys: [0x1FA9F],
-                isSkinToneSupport: false,
-                searchKey: "window",
                 version: 13.0
             ),
             MCEmoji(
