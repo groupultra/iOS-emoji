@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "MCEmojiPicker",
     defaultLocalization: "en",
-    platforms: [.iOS("13.0")],
+    platforms: [.iOS("15.0")],
     products: [
         .executable(name: "MCEmojiPickerJSON", targets: ["MCEmojiPickerJSON"]),
         .library(name: "MCEmojiPicker", targets: ["MCEmojiPicker"])
