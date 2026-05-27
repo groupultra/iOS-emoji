@@ -76,10 +76,20 @@ struct MCSearchKeywordsLoader {
     }
 
     /// Attempts to load and decode a keyword JSON file for the given locale string.
+    ///
+    /// The `subdirectory: "SearchKeywords"` argument is REQUIRED because
+    /// `Package.swift` declares `.copy("Resources/SearchKeywords")`, which
+    /// preserves the `SearchKeywords/` folder inside the resource bundle.
+    /// `Bundle.url(forResource:withExtension:)` only searches the bundle root
+    /// and `.lproj` directories; without the subdirectory argument it cannot
+    /// find these files and every locale silently fails to load — causing all
+    /// emojis to fall back to camelCase-split `searchKey` matching and breaking
+    /// multilingual search entirely.
     private static func tryLoad(locale: String) -> [String: [String]]? {
         guard let url = Bundle.module.url(
             forResource: "searchKeywords_\(locale)",
-            withExtension: "json"
+            withExtension: "json",
+            subdirectory: "SearchKeywords"
         ) else { return nil }
         guard let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONDecoder().decode([String: [String]].self, from: data)
